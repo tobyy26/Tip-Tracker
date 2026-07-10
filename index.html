@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
-<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%230f6e56'/><text x='50%' y='55%' font-family='-apple-system, BlinkMacSystemFont, sans-serif' font-weight='600' font-size='95' fill='%23ffffff' text-anchor='middle' doming-baseline='central' dy='.1em'>$</text></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%230f6e56'/><text x='50%' y='55%' font-family='-apple-system, BlinkMacSystemFont, sans-serif' font-weight='600' font-size='95' fill='%23ffffff' text-anchor='middle' dominant-baseline='central' dy='.1em'>$</text></svg>">
 
 <title>Tip Tracker</title>
 <style>
@@ -87,9 +87,30 @@
     border-color: var(--accent);
   }
   
-  /* Forces the layout container to display everything typed here in uppercase */
   #tip-location {
     text-transform: uppercase;
+  }
+  
+  .location-input-container {
+    display: flex;
+    gap: 8px;
+  }
+  
+  .gps-btn {
+    width: 42px;
+    height: 42px;
+    background: var(--surface-1);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .gps-btn:active {
+    background: var(--accent-bg);
   }
   
   .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
@@ -102,7 +123,7 @@
     border-radius: var(--radius);
     padding: 6px 12px; 
     font-size: 12px;
-    text-transform: uppercase; /* Ensures quick-select chips look uppercase too */
+    text-transform: uppercase;
   }
   button { 
     cursor: pointer; 
@@ -172,7 +193,10 @@
     </div>
     <div class="field">
       <label for="tip-location">Location</label>
-      <input type="text" id="tip-location" placeholder="E.G. JFK - TERMINAL 4" />
+      <div class="location-input-container">
+        <input type="text" id="tip-location" placeholder="E.G. JFK - TERMINAL 4" />
+        <button type="button" id="gps-btn" class="gps-btn" aria-label="Find closest airport">🧭</button>
+      </div>
       <div class="chips" id="loc-chips"></div>
     </div>
     <div class="field">
@@ -203,6 +227,7 @@
   const locationEl = document.getElementById('tip-location');
   const reasonEl = document.getElementById('tip-reason');
   const addBtn = document.getElementById('add-btn');
+  const gpsBtn = document.getElementById('gps-btn');
   const errorEl = document.getElementById('form-error');
   const listEl = document.getElementById('entries-list');
   const emptyEl = document.getElementById('empty-state');
@@ -304,10 +329,90 @@
     });
   }
 
+  // Smart Aviation Code Lookup via Overpass API
+  gpsBtn.addEventListener('click', () => {
+    errorEl.style.display = 'none';
+    if (!navigator.geolocation) {
+      errorEl.textContent = 'Geolocation is not supported by your browser.';
+      errorEl.style.display = 'block';
+      return;
+    }
+
+    gpsBtn.textContent = '⏳';
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+        
+        // Scans a ~15km radius around your GPS position specifically for aerodromes
+        const radius = 15000; 
+        const query = `[out:json];node(around:${radius},${lat},${lon})["aeroway"="aerodrome"];out;`;
+        const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+
+        fetch(url)
+          .then(response => response.json())
+          .then(data => {
+            if (!data.elements || data.elements.length === 0) {
+              throw new Error("No airfields found nearby.");
+            }
+
+            function getDist(lat1, lon1, lat2, lon2) {
+              const R = 6371;
+              const dLat = (lat2-lat1) * Math.PI / 180;
+              const dLon = (lon2-lon1) * Math.PI / 180;
+              const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+              return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            }
+
+            let closestAirfield = null;
+            let minDist = Infinity;
+
+            data.elements.forEach(el => {
+              const d = getDist(lat, lon, el.lat, el.lon);
+              if (d < minDist) {
+                minDist = d;
+                closestAirfield = el;
+              }
+            });
+
+            // Fallback order: IATA -> FAA -> ICAO -> Local Identifier -> Airport Name
+            let code = '';
+            if (closestAirfield.tags) {
+              code = closestAirfield.tags.iata || 
+                     closestAirfield.tags.faa || 
+                     closestAirfield.tags.icao || 
+                     closestAirfield.tags['ref:faa'] ||
+                     closestAirfield.tags.local_ref ||
+                     closestAirfield.tags.name;
+            }
+
+            if (code) {
+              if (code.length > 8 && closestAirfield.tags.faa) code = closestAirfield.tags.faa;
+              locationEl.value = code.trim().toUpperCase();
+              reasonEl.focus();
+            } else {
+              locationEl.value = "FIELD FOUND";
+            }
+            gpsBtn.textContent = '🧭';
+          })
+          .catch(err => {
+            gpsBtn.textContent = '🧭';
+            errorEl.textContent = 'Could not pinpoint airfield code automatically.';
+            errorEl.style.display = 'block';
+          });
+      },
+      (error) => {
+        gpsBtn.textContent = '🧭';
+        errorEl.textContent = 'Unable to access device location.';
+        errorEl.style.display = 'block';
+      },
+      { enableHighAccuracy: true, timeout: 7000 }
+    );
+  });
+
   addBtn.addEventListener('click', () => {
     errorEl.style.display = 'none';
     const date = dateEl.value;
-    // Cleans and converts the saved location value into strict uppercase strings
     const location = locationEl.value.trim().toUpperCase();
     const reason = reasonEl.value.trim();
     const amount = amountEl.value;
