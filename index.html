@@ -194,7 +194,7 @@
     <div class="field">
       <label for="tip-location">Location</label>
       <div class="location-input-container">
-        <input type="text" id="tip-location" placeholder="E.G. JFK - TERMINAL 4" />
+        <input type="text" id="tip-location" placeholder="E.G. TEB, VNY" />
         <button type="button" id="gps-btn" class="gps-btn" aria-label="Find closest airport">🧭</button>
       </div>
       <div class="chips" id="loc-chips"></div>
@@ -329,11 +329,26 @@
     });
   }
 
-  // Smart Aviation Code Lookup via Overpass API
+  function runFallbackCityLookup(lat, lon) {
+    fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`)
+      .then(r => r.json())
+      .then(data => {
+        const fallbackName = data.locality || data.city || "FIELD FOUND";
+        locationEl.value = fallbackName.trim().toUpperCase();
+        reasonEl.focus();
+        gpsBtn.textContent = '🧭';
+      })
+      .catch(() => {
+        gpsBtn.textContent = '🧭';
+        errorEl.textContent = 'Location tracking unavailable.';
+        errorEl.style.display = 'block';
+      });
+  }
+
   gpsBtn.addEventListener('click', () => {
     errorEl.style.display = 'none';
     if (!navigator.geolocation) {
-      errorEl.textContent = 'Geolocation is not supported by your browser.';
+      errorEl.textContent = 'Geolocation is not supported.';
       errorEl.style.display = 'block';
       return;
     }
@@ -344,16 +359,21 @@
         const lat = position.coords.latitude;
         const lon = position.coords.longitude;
         
-        // Scans a ~15km radius around your GPS position specifically for aerodromes
         const radius = 15000; 
-        const query = `[out:json];node(around:${radius},${lat},${lon})["aeroway"="aerodrome"];out;`;
+        const query = `[out:json][timeout:12];node(around:${radius},${lat},${lon})["aeroway"="aerodrome"];out;`;
         const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
 
-        fetch(url)
+        // Timeout limit expanded to 12 seconds to ensure slow cell connections get the actual code
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 12000);
+
+        fetch(url, { signal: controller.signal })
           .then(response => response.json())
           .then(data => {
+            clearTimeout(timeoutId);
             if (!data.elements || data.elements.length === 0) {
-              throw new Error("No airfields found nearby.");
+              runFallbackCityLookup(lat, lon);
+              return;
             }
 
             function getDist(lat1, lon1, lat2, lon2) {
@@ -375,7 +395,6 @@
               }
             });
 
-            // Fallback order: IATA -> FAA -> ICAO -> Local Identifier -> Airport Name
             let code = '';
             if (closestAirfield.tags) {
               code = closestAirfield.tags.iata || 
@@ -390,23 +409,22 @@
               if (code.length > 8 && closestAirfield.tags.faa) code = closestAirfield.tags.faa;
               locationEl.value = code.trim().toUpperCase();
               reasonEl.focus();
+              gpsBtn.textContent = '🧭';
             } else {
-              locationEl.value = "FIELD FOUND";
+              runFallbackCityLookup(lat, lon);
             }
-            gpsBtn.textContent = '🧭';
           })
-          .catch(err => {
-            gpsBtn.textContent = '🧭';
-            errorEl.textContent = 'Could not pinpoint airfield code automatically.';
-            errorEl.style.display = 'block';
+          .catch(() => {
+            clearTimeout(timeoutId);
+            runFallbackCityLookup(lat, lon);
           });
       },
-      (error) => {
+      () => {
         gpsBtn.textContent = '🧭';
         errorEl.textContent = 'Unable to access device location.';
         errorEl.style.display = 'block';
       },
-      { enableHighAccuracy: true, timeout: 7000 }
+      { enableHighAccuracy: true, timeout: 5000 }
     );
   });
 
