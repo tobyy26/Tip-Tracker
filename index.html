@@ -2,8 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Tip tracker</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%230f6e56'/><text x='50%' y='55%' font-family='-apple-system, BlinkMacSystemFont, sans-serif' font-weight='600' font-size='95' fill='%23ffffff' text-anchor='middle' doming-baseline='central' dy='.1em'>$</text></svg>">
+
+<title>Tip Tracker</title>
 <style>
   :root {
     --surface-2: #ffffff;
@@ -34,7 +39,10 @@
       --danger: #f09595;
     }
   }
-  * { box-sizing: border-box; }
+  * { 
+    box-sizing: border-box; 
+    -webkit-tap-highlight-color: transparent; 
+  }
   body {
     margin: 0;
     background: var(--surface-0);
@@ -43,6 +51,7 @@
     padding: 1rem;
     max-width: 480px;
     margin: 0 auto;
+    -webkit-text-size-adjust: 100%;
   }
   h1 {
     font-size: 18px;
@@ -64,18 +73,25 @@
   }
   input {
     width: 100%;
-    height: 38px;
+    height: 42px; 
     border-radius: var(--radius);
     border: 1px solid var(--border-strong);
     background: var(--surface-1);
     color: var(--text-primary);
     padding: 0 10px;
-    font-size: 15px;
+    font-size: 16px; 
+    -webkit-appearance: none; 
   }
   input:focus {
     outline: none;
     border-color: var(--accent);
   }
+  
+  /* Forces the layout container to display everything typed here in uppercase */
+  #tip-location {
+    text-transform: uppercase;
+  }
+  
   .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
   .field { margin-bottom: 8px; }
   .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
@@ -84,13 +100,17 @@
     background: var(--surface-1);
     color: var(--text-primary);
     border-radius: var(--radius);
-    padding: 5px 10px;
+    padding: 6px 12px; 
     font-size: 12px;
+    text-transform: uppercase; /* Ensures quick-select chips look uppercase too */
   }
-  button { cursor: pointer; }
+  button { 
+    cursor: pointer; 
+    touch-action: manipulation; 
+  }
   #add-btn {
     width: 100%;
-    height: 42px;
+    height: 44px; 
     background: var(--accent);
     color: white;
     border: none;
@@ -101,7 +121,7 @@
   }
   #export-btn {
     width: 100%;
-    height: 42px;
+    height: 44px;
     background: var(--surface-2);
     color: var(--text-primary);
     border: 1px solid var(--border-strong);
@@ -116,7 +136,7 @@
   .total { font-size: 13px; color: var(--text-secondary); }
   .entry {
     display: flex; align-items: center; gap: 10px;
-    padding: 10px 0; border-bottom: 1px solid var(--border);
+    padding: 12px 0; border-bottom: 1px solid var(--border);
   }
   .entry-main { flex: 1; min-width: 0; }
   .entry-top { display: flex; align-items: baseline; gap: 8px; }
@@ -126,7 +146,7 @@
   .entry-amount { font-size: 14px; font-weight: 600; white-space: nowrap; }
   .del-btn {
     border: none; background: transparent; padding: 4px;
-    width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
     color: var(--text-muted); font-size: 18px;
   }
   .empty {
@@ -136,10 +156,10 @@
 </style>
 </head>
 <body>
-  <h1>Tip tracker</h1>
+  <h1>Tip Tracker</h1>
 
   <div class="card">
-    <p style="font-weight:600; font-size:15px; margin:0 0 12px;">Log a tip</p>
+    <p style="font-weight:600; font-size:15px; margin:0 0 12px;">Log a Tip</p>
     <div class="row2">
       <div>
         <label for="tip-date">Date</label>
@@ -147,19 +167,19 @@
       </div>
       <div>
         <label for="tip-amount">Amount</label>
-        <input type="number" id="tip-amount" placeholder="$" step="0.01" min="0" />
+        <input type="number" id="tip-amount" placeholder="$" step="0.01" min="0" inputmode="decimal" />
       </div>
     </div>
     <div class="field">
       <label for="tip-location">Location</label>
-      <input type="text" id="tip-location" placeholder="e.g. JFK - Terminal 4" />
+      <input type="text" id="tip-location" placeholder="E.G. JFK - TERMINAL 4" />
       <div class="chips" id="loc-chips"></div>
     </div>
     <div class="field">
       <label for="tip-reason">What the tip was for</label>
-      <input type="text" id="tip-reason" placeholder="e.g. catering, fuel delivery" />
+      <input type="text" id="tip-reason" placeholder="e.g. catering, fuel delivery" autocapitalize="sentences" />
     </div>
-    <button id="add-btn">Add entry</button>
+    <button id="add-btn">Add Entry</button>
     <p class="error" id="form-error"></p>
   </div>
 
@@ -201,8 +221,12 @@
   resetForm();
 
   function fmtDate(iso) {
-    const d = new Date(iso + 'T00:00:00');
-    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    const parts = iso.split('-');
+    if(parts.length === 3) {
+      const d = new Date(parts[0], parts[1] - 1, parts[2]);
+      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    }
+    return iso;
   }
   function fmtMoney(n) { return '$' + Number(n).toFixed(2); }
 
@@ -233,9 +257,11 @@
     entries.forEach(e => { if (e.location) counts[e.location] = (counts[e.location]||0) + 1; });
     const top = Object.keys(counts).sort((a,b) => counts[b]-counts[a]).slice(0, 6);
     chipsEl.innerHTML = top.map(loc => `<button type="button" class="chip" data-loc="${escapeHtml(loc)}">${escapeHtml(loc)}</button>`).join('');
+    
     document.querySelectorAll('.chip').forEach(chip => {
-      chip.addEventListener('click', () => {
-        locationEl.value = chip.getAttribute('data-loc');
+      chip.addEventListener('click', (e) => {
+        e.preventDefault();
+        locationEl.value = chip.getAttribute('data-loc').toUpperCase();
         reasonEl.focus();
       });
     });
@@ -281,7 +307,8 @@
   addBtn.addEventListener('click', () => {
     errorEl.style.display = 'none';
     const date = dateEl.value;
-    const location = locationEl.value.trim();
+    // Cleans and converts the saved location value into strict uppercase strings
+    const location = locationEl.value.trim().toUpperCase();
     const reason = reasonEl.value.trim();
     const amount = amountEl.value;
 
