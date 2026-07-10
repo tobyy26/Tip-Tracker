@@ -329,6 +329,18 @@
     });
   }
 
+  // Pure mathematical Haversine calculation to check distances globally
+  function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 3958.8; // Earth radius in miles
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  // Backup fallback system using reverse geocoding if the massive lookup fails
   function runFallbackCityLookup(lat, lon) {
     fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`)
       .then(r => r.json())
@@ -345,6 +357,7 @@
       });
   }
 
+  // Geolocation trigger mapped to the 28,000 global airport database
   gpsBtn.addEventListener('click', () => {
     errorEl.style.display = 'none';
     if (!navigator.geolocation) {
@@ -356,67 +369,42 @@
     gpsBtn.textContent = '⏳';
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        const lat = position.coords.latitude;
-        const lon = position.coords.longitude;
-        
-        const radius = 15000; 
-        const query = `[out:json][timeout:12];node(around:${radius},${lat},${lon})["aeroway"="aerodrome"];out;`;
-        const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+        const userLat = position.coords.latitude;
+        const userLon = position.coords.longitude;
 
-        // Timeout limit expanded to 12 seconds to ensure slow cell connections get the actual code
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 12000);
+        // Streams the open-source global database directly into the browser session
+        fetch('https://raw.githubusercontent.com/mwgg/Airports/master/airports.json')
+          .then(res => res.json())
+          .then(airports => {
+            let closestCode = null;
+            let shortestDistance = Infinity;
 
-        fetch(url, { signal: controller.signal })
-          .then(response => response.json())
-          .then(data => {
-            clearTimeout(timeoutId);
-            if (!data.elements || data.elements.length === 0) {
-              runFallbackCityLookup(lat, lon);
-              return;
-            }
+            // Iterates instantly over every airport to locate the absolute closest match
+            for (const key in airports) {
+              const ap = airports[key];
+              if (!ap.lat || !ap.lon) continue;
 
-            function getDist(lat1, lon1, lat2, lon2) {
-              const R = 6371;
-              const dLat = (lat2-lat1) * Math.PI / 180;
-              const dLon = (lon2-lon1) * Math.PI / 180;
-              const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
-              return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            }
-
-            let closestAirfield = null;
-            let minDist = Infinity;
-
-            data.elements.forEach(el => {
-              const d = getDist(lat, lon, el.lat, el.lon);
-              if (d < minDist) {
-                minDist = d;
-                closestAirfield = el;
+              const distance = calculateDistance(userLat, userLon, ap.lat, ap.lon);
+              if (distance < shortestDistance) {
+                shortestDistance = distance;
+                // Favor the standard identifier code (ICAO or IATA)
+                closestCode = ap.icao || ap.iata || key;
               }
-            });
-
-            let code = '';
-            if (closestAirfield.tags) {
-              code = closestAirfield.tags.iata || 
-                     closestAirfield.tags.faa || 
-                     closestAirfield.tags.icao || 
-                     closestAirfield.tags['ref:faa'] ||
-                     closestAirfield.tags.local_ref ||
-                     closestAirfield.tags.name;
             }
 
-            if (code) {
-              if (code.length > 8 && closestAirfield.tags.faa) code = closestAirfield.tags.faa;
-              locationEl.value = code.trim().toUpperCase();
+            // Cap the lock to a realistic 25-mile operational limit 
+            if (closestCode && shortestDistance <= 25) {
+              locationEl.value = closestCode.trim().toUpperCase();
               reasonEl.focus();
               gpsBtn.textContent = '🧭';
             } else {
-              runFallbackCityLookup(lat, lon);
+              // Fallback to municipal city data if you are deep in the woods or completely off grid
+              runFallbackCityLookup(userLat, userLon);
             }
           })
           .catch(() => {
-            clearTimeout(timeoutId);
-            runFallbackCityLookup(lat, lon);
+            // Safe fallback if the GitHub file raw text encounters a network glitch
+            runFallbackCityLookup(userLat, userLon);
           });
       },
       () => {
