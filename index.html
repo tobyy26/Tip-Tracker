@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tip tracker</title>
+<style>
+  :root {
+    --surface-2: #ffffff;
+    --surface-1: #f7f6f3;
+    --surface-0: #f1efe8;
+    --text-primary: #1a1a18;
+    --text-secondary: #5f5e5a;
+    --text-muted: #888780;
+    --border: rgba(0,0,0,0.1);
+    --border-strong: rgba(0,0,0,0.2);
+    --accent: #0f6e56;
+    --accent-bg: #e1f5ee;
+    --danger: #a32d2d;
+    --radius: 8px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --surface-2: #232321;
+      --surface-1: #2c2c2a;
+      --surface-0: #1a1a18;
+      --text-primary: #f1efe8;
+      --text-secondary: #b4b2a9;
+      --text-muted: #888780;
+      --border: rgba(255,255,255,0.12);
+      --border-strong: rgba(255,255,255,0.22);
+      --accent: #5dcaa5;
+      --accent-bg: #08504133;
+      --danger: #f09595;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--surface-0);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    padding: 1rem;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 1rem;
+  }
+  .card {
+    background: var(--surface-2);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    padding: 1rem 1.1rem;
+    margin-bottom: 1rem;
+  }
+  label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    display: block;
+    margin-bottom: 4px;
+  }
+  input {
+    width: 100%;
+    height: 38px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-strong);
+    background: var(--surface-1);
+    color: var(--text-primary);
+    padding: 0 10px;
+    font-size: 15px;
+  }
+  input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+  .field { margin-bottom: 8px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .chip {
+    border: 1px solid var(--border-strong);
+    background: var(--surface-1);
+    color: var(--text-primary);
+    border-radius: var(--radius);
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+  button { cursor: pointer; }
+  #add-btn {
+    width: 100%;
+    height: 42px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-weight: 600;
+    font-size: 15px;
+    margin-top: 4px;
+  }
+  #export-btn {
+    width: 100%;
+    height: 42px;
+    background: var(--surface-2);
+    color: var(--text-primary);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    font-weight: 600;
+    font-size: 15px;
+    margin-top: 12px;
+  }
+  .error { font-size: 12px; color: var(--danger); margin: 8px 0 0; display: none; }
+  .list-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
+  .list-header p { font-weight: 600; font-size: 15px; margin: 0; }
+  .total { font-size: 13px; color: var(--text-secondary); }
+  .entry {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 0; border-bottom: 1px solid var(--border);
+  }
+  .entry-main { flex: 1; min-width: 0; }
+  .entry-top { display: flex; align-items: baseline; gap: 8px; }
+  .entry-date { font-size: 13px; color: var(--text-secondary); min-width: 44px; }
+  .entry-reason { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .entry-loc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .entry-amount { font-size: 14px; font-weight: 600; white-space: nowrap; }
+  .del-btn {
+    border: none; background: transparent; padding: 4px;
+    width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted); font-size: 18px;
+  }
+  .empty {
+    text-align: center; padding: 2rem 1rem; color: var(--text-muted); font-size: 13px;
+    display: none;
+  }
+</style>
+</head>
+<body>
+  <h1>Tip tracker</h1>
+
+  <div class="card">
+    <p style="font-weight:600; font-size:15px; margin:0 0 12px;">Log a tip</p>
+    <div class="row2">
+      <div>
+        <label for="tip-date">Date</label>
+        <input type="date" id="tip-date" />
+      </div>
+      <div>
+        <label for="tip-amount">Amount</label>
+        <input type="number" id="tip-amount" placeholder="$" step="0.01" min="0" />
+      </div>
+    </div>
+    <div class="field">
+      <label for="tip-location">Location</label>
+      <input type="text" id="tip-location" placeholder="e.g. JFK - Terminal 4" />
+      <div class="chips" id="loc-chips"></div>
+    </div>
+    <div class="field">
+      <label for="tip-reason">What the tip was for</label>
+      <input type="text" id="tip-reason" placeholder="e.g. catering, fuel delivery" />
+    </div>
+    <button id="add-btn">Add entry</button>
+    <p class="error" id="form-error"></p>
+  </div>
+
+  <div class="list-header">
+    <p>This week's log</p>
+    <span class="total" id="total"></span>
+  </div>
+
+  <div id="entries-list"></div>
+  <div class="empty" id="empty-state">No tips logged yet. Add your first one above.</div>
+
+  <button id="export-btn">Export as CSV</button>
+
+<script>
+(function() {
+  const STORAGE_KEY = 'tip-entries-local';
+  let entries = [];
+
+  const dateEl = document.getElementById('tip-date');
+  const amountEl = document.getElementById('tip-amount');
+  const locationEl = document.getElementById('tip-location');
+  const reasonEl = document.getElementById('tip-reason');
+  const addBtn = document.getElementById('add-btn');
+  const errorEl = document.getElementById('form-error');
+  const listEl = document.getElementById('entries-list');
+  const emptyEl = document.getElementById('empty-state');
+  const totalEl = document.getElementById('total');
+  const exportBtn = document.getElementById('export-btn');
+  const chipsEl = document.getElementById('loc-chips');
+
+  function todayStr() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+  function resetForm() {
+    dateEl.value = todayStr();
+    amountEl.value = '5';
+  }
+  resetForm();
+
+  function fmtDate(iso) {
+    const d = new Date(iso + 'T00:00:00');
+    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  }
+  function fmtMoney(n) { return '$' + Number(n).toFixed(2); }
+
+  function loadLocal() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      entries = raw ? JSON.parse(raw) : [];
+    } catch (e) { entries = []; }
+    render();
+  }
+  function saveLocal() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+    } catch (e) {
+      errorEl.textContent = "Couldn't save on this device.";
+      errorEl.style.display = 'block';
+    }
+  }
+
+  function escapeHtml(s) {
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  function renderChips() {
+    const counts = {};
+    entries.forEach(e => { if (e.location) counts[e.location] = (counts[e.location]||0) + 1; });
+    const top = Object.keys(counts).sort((a,b) => counts[b]-counts[a]).slice(0, 6);
+    chipsEl.innerHTML = top.map(loc => `<button type="button" class="chip" data-loc="${escapeHtml(loc)}">${escapeHtml(loc)}</button>`).join('');
+    document.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        locationEl.value = chip.getAttribute('data-loc');
+        reasonEl.focus();
+      });
+    });
+  }
+
+  function render() {
+    entries.sort((a,b) => b.date.localeCompare(a.date) || b.id - a.id);
+    renderChips();
+    if (entries.length === 0) {
+      listEl.innerHTML = '';
+      emptyEl.style.display = 'block';
+      totalEl.textContent = '';
+      return;
+    }
+    emptyEl.style.display = 'none';
+    const total = entries.reduce((s,e) => s + (Number(e.amount) || 0), 0);
+    totalEl.textContent = fmtMoney(total) + ' total';
+
+    listEl.innerHTML = entries.map(e => `
+      <div class="entry">
+        <div class="entry-main">
+          <div class="entry-top">
+            <span class="entry-date">${fmtDate(e.date)}</span>
+            <span class="entry-reason">${escapeHtml(e.reason || 'Tip')}</span>
+          </div>
+          <div class="entry-loc">${escapeHtml(e.location || 'No location')}</div>
+        </div>
+        <span class="entry-amount">${e.amount ? fmtMoney(e.amount) : ''}</span>
+        <button data-id="${e.id}" class="del-btn" aria-label="Delete entry">&#10005;</button>
+      </div>
+    `).join('');
+
+    document.querySelectorAll('.del-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = Number(btn.getAttribute('data-id'));
+        entries = entries.filter(e => e.id !== id);
+        render();
+        saveLocal();
+      });
+    });
+  }
+
+  addBtn.addEventListener('click', () => {
+    errorEl.style.display = 'none';
+    const date = dateEl.value;
+    const location = locationEl.value.trim();
+    const reason = reasonEl.value.trim();
+    const amount = amountEl.value;
+
+    if (!date || !location || !reason) {
+      errorEl.textContent = 'Fill in date, location, and what the tip was for.';
+      errorEl.style.display = 'block';
+      return;
+    }
+
+    entries.push({ id: Date.now(), date, location, reason, amount: amount ? Number(amount) : null });
+
+    locationEl.value = '';
+    reasonEl.value = '';
+    resetForm();
+
+    render();
+    saveLocal();
+  });
+
+  exportBtn.addEventListener('click', () => {
+    if (entries.length === 0) return;
+    const rows = [['Date','Location','Reason','Amount']];
+    entries.slice().sort((a,b) => a.date.localeCompare(b.date)).forEach(e => {
+      rows.push([e.date, e.location, e.reason, e.amount != null ? e.amount : '']);
+    });
+    const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'tip-log.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  loadLocal();
+})();
+</script>
+</body>
+</html>
