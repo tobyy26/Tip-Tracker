@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
-<link rel="apple-touch-icon" href="Tip tracker app.png">
+<link rel="apple-touch-icon" href="Tip tacker app.png">
 <link rel="icon" type="image/png" href="Tip tracker app.png">
   
 <title>Tip Tracker</title>
@@ -153,9 +153,45 @@
     margin-top: 12px;
   }
   .error { font-size: 12px; color: var(--danger); margin: 8px 0 0; display: none; }
-  .list-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
+  
+  /* Layout container to place the Total string and Clear [X] box on the same line */
+  .list-header { 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    margin-bottom: 8px; 
+  }
+  .list-header-left {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
   .list-header p { font-weight: 600; font-size: 15px; margin: 0; }
-  .total { font-size: 13px; color: var(--text-secondary); }
+  .total { font-size: 13px; color: var(--text-secondary); font-weight: 600; }
+  
+  /* Matte finish flat square clear button targeting company dark gray look */
+  #clear-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background-color: var(--surface-1);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-strong);
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 11px;
+    padding: 0;
+    transition: all 0.2s ease;
+  }
+  #clear-btn:active {
+    background-color: var(--danger);
+    color: white;
+    border-color: var(--danger);
+    transform: scale(0.95);
+  }
+
   .entry {
     display: flex; align-items: center; gap: 10px;
     padding: 12px 0; border-bottom: 1px solid var(--border);
@@ -209,8 +245,11 @@
   </div>
 
   <div class="list-header">
-    <p>This week's log</p>
-    <span class="total" id="total"></span>
+    <div class="list-header-left">
+      <p>This week's log</p>
+      <span class="total" id="total"></span>
+    </div>
+    <button id="clear-btn" onclick="confirmClear()" title="Clear All Data">X</button>
   </div>
 
   <div id="entries-list"></div>
@@ -408,10 +447,29 @@
             runFallbackCityLookup(userLat, userLon);
           });
       },
-      () => {
+      // Privacy Error Callback (Handles denied access or disabled device toggles cleanly!)
+      (error) => {
         gpsBtn.textContent = '🧭';
-        errorEl.textContent = 'Unable to access device location.';
-        errorEl.style.display = 'block';
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            alert(
+              "Location access denied.\n\n" +
+              "To auto-fill your closest airport, please enable Location Services for Safari/Chrome in your iPhone Settings, or type the code manually."
+            );
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorEl.textContent = 'Location information is unavailable.';
+            errorEl.style.display = 'block';
+            break;
+          case error.TIMEOUT:
+            errorEl.textContent = 'The request to get location timed out.';
+            errorEl.style.display = 'block';
+            break;
+          default:
+            errorEl.textContent = 'An unknown location error occurred.';
+            errorEl.style.display = 'block';
+            break;
+        }
       },
       { enableHighAccuracy: true, timeout: 5000 }
     );
@@ -455,6 +513,17 @@
     a.click();
     URL.revokeObjectURL(url);
   });
+
+  // Global window function invoked when tapping the adjacent [X] box
+  window.confirmClear = function() {
+    let warning = confirm("Are you sure you want to clear all data? This cannot be undone.");
+    
+    if (warning) {
+      localStorage.removeItem(STORAGE_KEY);
+      entries = [];
+      render();
+    }
+  };
 
   loadLocal();
 })();
