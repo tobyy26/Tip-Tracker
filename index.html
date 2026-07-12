@@ -8,7 +8,7 @@
 
 <link rel="apple-touch-icon" href="Tip tracker app.png">
 <link rel="icon" type="image/png" href="Tip tracker app.png">
-  
+
 <title>Tip Tracker</title>
 <style>
   :root {
@@ -40,9 +40,9 @@
       --danger: #f09595;
     }
   }
-  * { 
-    box-sizing: border-box; 
-    -webkit-tap-highlight-color: transparent; 
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
   }
   body {
     margin: 0;
@@ -54,11 +54,7 @@
     margin: 0 auto;
     -webkit-text-size-adjust: 100%;
   }
-  h1 {
-    font-size: 18px;
-    font-weight: 600;
-    margin: 0 0 1rem;
-  }
+  h1 { font-size: 18px; font-weight: 600; margin: 0 0 1rem; }
   .card {
     background: var(--surface-2);
     border-radius: 12px;
@@ -66,54 +62,33 @@
     padding: 1rem 1.1rem;
     margin-bottom: 1rem;
   }
-  label {
-    font-size: 12px;
-    color: var(--text-secondary);
-    display: block;
-    margin-bottom: 4px;
-  }
+  .card-title { font-weight: 600; font-size: 15px; margin: 0 0 12px; }
+  .card-subtitle { font-size: 12px; color: var(--text-secondary); margin: -8px 0 12px; }
+  label { font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 4px; }
   input {
     width: 100%;
-    height: 42px; 
+    height: 42px;
     border-radius: var(--radius);
     border: 1px solid var(--border-strong);
     background: var(--surface-1);
     color: var(--text-primary);
     padding: 0 10px;
-    font-size: 16px; 
-    -webkit-appearance: none; 
+    font-size: 16px;
+    -webkit-appearance: none;
   }
-  input:focus {
-    outline: none;
-    border-color: var(--accent);
-  }
-  
-  #tip-location {
-    text-transform: uppercase;
-  }
-  
-  .location-input-container {
-    display: flex;
-    gap: 8px;
-  }
-  
+  input:focus { outline: none; border-color: var(--accent); }
+  #tip-location { text-transform: uppercase; }
+  .location-input-container { display: flex; gap: 8px; }
   .gps-btn {
-    width: 42px;
-    height: 42px;
+    width: 42px; height: 42px;
     background: var(--surface-1);
     border: 1px solid var(--border-strong);
     border-radius: var(--radius);
     color: var(--accent);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
   }
-  .gps-btn:active {
-    background: var(--accent-bg);
-  }
-  
+  .gps-btn:active { background: var(--accent-bg); }
   .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
   .field { margin-bottom: 8px; }
   .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
@@ -122,76 +97,43 @@
     background: var(--surface-1);
     color: var(--text-primary);
     border-radius: var(--radius);
-    padding: 6px 12px; 
+    padding: 6px 12px;
     font-size: 12px;
     text-transform: uppercase;
   }
-  button { 
-    cursor: pointer; 
-    touch-action: manipulation; 
-  }
+  button { cursor: pointer; touch-action: manipulation; font-family: inherit; }
   #add-btn {
-    width: 100%;
-    height: 44px; 
-    background: var(--accent);
-    color: white;
-    border: none;
-    border-radius: var(--radius);
-    font-weight: 600;
-    font-size: 15px;
-    margin-top: 4px;
+    width: 100%; height: 44px;
+    background: var(--accent); color: white; border: none;
+    border-radius: var(--radius); font-weight: 600; font-size: 15px; margin-top: 4px;
   }
-  #export-btn {
-    width: 100%;
-    height: 44px;
-    background: var(--surface-2);
-    color: var(--text-primary);
+  .btn-secondary {
+    width: 100%; height: 44px;
+    background: var(--surface-2); color: var(--text-primary);
     border: 1px solid var(--border-strong);
-    border-radius: var(--radius);
-    font-weight: 600;
-    font-size: 15px;
-    margin-top: 12px;
+    border-radius: var(--radius); font-weight: 600; font-size: 15px;
   }
+  .btn-primary {
+    width: 100%; height: 46px;
+    background: var(--accent); color: white; border: none;
+    border-radius: var(--radius); font-weight: 600; font-size: 15px;
+  }
+  .btn-primary:disabled { opacity: 0.45; }
   .error { font-size: 12px; color: var(--danger); margin: 8px 0 0; display: none; }
-  
-  /* Layout container to place the Total string and Clear [X] box on the same line */
-  .list-header { 
-    display: flex; 
-    align-items: center; 
-    justify-content: space-between; 
-    margin-bottom: 8px; 
-  }
-  .list-header-left {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-  }
+  .list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .list-header-left { display: flex; align-items: baseline; gap: 8px; }
   .list-header p { font-weight: 600; font-size: 15px; margin: 0; }
   .total { font-size: 13px; color: var(--text-secondary); font-weight: 600; }
-  
-  /* Matte finish flat square clear button targeting company dark gray look */
   #clear-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px;
     background-color: var(--surface-1);
     color: var(--text-secondary);
     border: 1px solid var(--border-strong);
-    border-radius: 4px;
-    font-weight: bold;
-    font-size: 11px;
-    padding: 0;
+    border-radius: 4px; font-weight: bold; font-size: 11px; padding: 0;
     transition: all 0.2s ease;
   }
-  #clear-btn:active {
-    background-color: var(--danger);
-    color: white;
-    border-color: var(--danger);
-    transform: scale(0.95);
-  }
-
+  #clear-btn:active { background-color: var(--danger); color: white; border-color: var(--danger); transform: scale(0.95); }
   .entry {
     display: flex; align-items: center; gap: 10px;
     padding: 12px 0; border-bottom: 1px solid var(--border);
@@ -200,24 +142,61 @@
   .entry-top { display: flex; align-items: baseline; gap: 8px; }
   .entry-date { font-size: 13px; color: var(--text-secondary); min-width: 44px; }
   .entry-reason { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .entry-loc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .entry-loc { font-size: 12px; color: var(--text-muted); margin-top: 2px; display: flex; align-items: center; gap: 6px; }
+  .sent-badge {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.02em;
+    color: var(--accent); background: var(--accent-bg);
+    border-radius: 4px; padding: 1px 6px;
+  }
   .entry-amount { font-size: 14px; font-weight: 600; white-space: nowrap; }
   .del-btn {
     border: none; background: transparent; padding: 4px;
     width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
     color: var(--text-muted); font-size: 18px;
   }
-  .empty {
-    text-align: center; padding: 2rem 1rem; color: var(--text-muted); font-size: 13px;
-    display: none;
+  .empty { text-align: center; padding: 2rem 1rem; color: var(--text-muted); font-size: 13px; display: none; }
+
+  .email-row {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 8px 10px; margin-bottom: 12px;
   }
+  .email-row span { font-size: 13px; font-family: ui-monospace, monospace; }
+  .copy-btn {
+    border: 1px solid var(--border-strong); background: var(--surface-2);
+    color: var(--text-primary); border-radius: 6px; font-size: 11px;
+    font-weight: 600; padding: 5px 9px; flex-shrink: 0; margin-left: 8px;
+  }
+  .unsent-note { font-size: 12px; color: var(--text-secondary); margin-top: 10px; text-align: center; }
+
+  .overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    display: none; align-items: flex-end; justify-content: center; z-index: 50;
+  }
+  .overlay.open { display: flex; }
+  .sheet {
+    background: var(--surface-0);
+    width: 100%; max-width: 480px;
+    border-radius: 16px 16px 0 0;
+    padding: 1.1rem 1.1rem calc(1.5rem + env(safe-area-inset-bottom));
+    max-height: 88vh; overflow-y: auto;
+  }
+  .sheet-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .sheet-header p { font-weight: 600; font-size: 15px; margin: 0; }
+  .sheet-close { border: none; background: transparent; font-size: 20px; color: var(--text-muted); padding: 4px; }
+  .receipt-preview {
+    width: 100%; border-radius: 10px; border: 1px solid var(--border);
+    display: block; margin-bottom: 14px; background: white;
+  }
+  .sheet-actions { display: flex; flex-direction: column; gap: 8px; }
+  .sheet-progress { font-size: 12px; color: var(--text-secondary); text-align: center; margin-bottom: 10px; }
 </style>
 </head>
 <body>
   <h1>Tip Tracker</h1>
 
   <div class="card">
-    <p style="font-weight:600; font-size:15px; margin:0 0 12px;">Log a Tip</p>
+    <p class="card-title">Log a Tip</p>
     <div class="row2">
       <div>
         <label for="tip-date">Date</label>
@@ -255,12 +234,43 @@
   <div id="entries-list"></div>
   <div class="empty" id="empty-state">No tips logged yet. Add your first one above.</div>
 
-  <button id="export-btn">Export as CSV</button>
+  <div class="card" id="submit-card">
+    <p class="card-title">Submit to Concur</p>
+    <p class="card-subtitle">Sends each tip as its own receipt image to ExpenseIt, so it lands as an individual expense.</p>
+    <div class="email-row">
+      <span>receipts@expenseit.com</span>
+      <button class="copy-btn" id="copy-email-btn">Copy</button>
+    </div>
+    <button class="btn-primary" id="send-all-btn" disabled>Send All</button>
+    <p class="unsent-note" id="unsent-note"></p>
+  </div>
+
+  <button id="export-btn" class="btn-secondary">Export as CSV</button>
+
+  <div class="overlay" id="send-overlay">
+    <div class="sheet">
+      <div class="sheet-header">
+        <p>Send to Concur</p>
+        <button class="sheet-close" id="close-sheet-btn" aria-label="Close">&#10005;</button>
+      </div>
+      <p class="sheet-progress" id="sheet-progress"></p>
+      <img class="receipt-preview" id="receipt-preview" alt="Receipt preview" />
+      <div class="sheet-actions">
+        <button class="btn-primary" id="share-btn">Share Receipt</button>
+        <button class="btn-secondary" id="mark-sent-btn">Mark Sent &amp; Next</button>
+        <button class="btn-secondary" id="skip-btn">Skip</button>
+      </div>
+    </div>
+  </div>
 
 <script>
 (function() {
   const STORAGE_KEY = 'tip-entries-local';
+  const EXPENSEIT_EMAIL = 'receipts@expenseit.com';
   let entries = [];
+  let sendQueue = [];
+  let sendIndex = 0;
+  let currentBlob = null;
 
   const dateEl = document.getElementById('tip-date');
   const amountEl = document.getElementById('tip-amount');
@@ -274,6 +284,16 @@
   const totalEl = document.getElementById('total');
   const exportBtn = document.getElementById('export-btn');
   const chipsEl = document.getElementById('loc-chips');
+  const sendAllBtn = document.getElementById('send-all-btn');
+  const unsentNoteEl = document.getElementById('unsent-note');
+  const copyEmailBtn = document.getElementById('copy-email-btn');
+  const overlayEl = document.getElementById('send-overlay');
+  const sheetProgressEl = document.getElementById('sheet-progress');
+  const receiptPreviewEl = document.getElementById('receipt-preview');
+  const shareBtn = document.getElementById('share-btn');
+  const markSentBtn = document.getElementById('mark-sent-btn');
+  const skipBtn = document.getElementById('skip-btn');
+  const closeSheetBtn = document.getElementById('close-sheet-btn');
 
   function todayStr() {
     const d = new Date();
@@ -287,9 +307,17 @@
 
   function fmtDate(iso) {
     const parts = iso.split('-');
-    if(parts.length === 3) {
+    if (parts.length === 3) {
       const d = new Date(parts[0], parts[1] - 1, parts[2]);
       return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    }
+    return iso;
+  }
+  function fmtDateLong(iso) {
+    const parts = iso.split('-');
+    if (parts.length === 3) {
+      const d = new Date(parts[0], parts[1] - 1, parts[2]);
+      return d.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
     }
     return iso;
   }
@@ -322,7 +350,6 @@
     entries.forEach(e => { if (e.location) counts[e.location] = (counts[e.location]||0) + 1; });
     const top = Object.keys(counts).sort((a,b) => counts[b]-counts[a]).slice(0, 6);
     chipsEl.innerHTML = top.map(loc => `<button type="button" class="chip" data-loc="${escapeHtml(loc)}">${escapeHtml(loc)}</button>`).join('');
-    
     document.querySelectorAll('.chip').forEach(chip => {
       chip.addEventListener('click', (e) => {
         e.preventDefault();
@@ -335,43 +362,54 @@
   function render() {
     entries.sort((a,b) => b.date.localeCompare(a.date) || b.id - a.id);
     renderChips();
+
     if (entries.length === 0) {
       listEl.innerHTML = '';
       emptyEl.style.display = 'block';
       totalEl.textContent = '';
-      return;
-    }
-    emptyEl.style.display = 'none';
-    const total = entries.reduce((s,e) => s + (Number(e.amount) || 0), 0);
-    totalEl.textContent = fmtMoney(total) + ' total';
+    } else {
+      emptyEl.style.display = 'none';
+      const total = entries.reduce((s,e) => s + (Number(e.amount) || 0), 0);
+      totalEl.textContent = fmtMoney(total) + ' total';
 
-    listEl.innerHTML = entries.map(e => `
-      <div class="entry">
-        <div class="entry-main">
-          <div class="entry-top">
-            <span class="entry-date">${fmtDate(e.date)}</span>
-            <span class="entry-reason">${escapeHtml(e.reason || 'Tip')}</span>
+      listEl.innerHTML = entries.map(e => `
+        <div class="entry">
+          <div class="entry-main">
+            <div class="entry-top">
+              <span class="entry-date">${fmtDate(e.date)}</span>
+              <span class="entry-reason">${escapeHtml(e.reason || 'Tip')}</span>
+            </div>
+            <div class="entry-loc">
+              ${escapeHtml(e.location || 'No location')}
+              ${e.sent ? '<span class="sent-badge">SENT</span>' : ''}
+            </div>
           </div>
-          <div class="entry-loc">${escapeHtml(e.location || 'No location')}</div>
+          <span class="entry-amount">${e.amount ? fmtMoney(e.amount) : ''}</span>
+          <button data-id="${e.id}" class="del-btn" aria-label="Delete entry">&#10005;</button>
         </div>
-        <span class="entry-amount">${e.amount ? fmtMoney(e.amount) : ''}</span>
-        <button data-id="${e.id}" class="del-btn" aria-label="Delete entry">&#10005;</button>
-      </div>
-    `).join('');
+      `).join('');
 
-    document.querySelectorAll('.del-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const id = Number(btn.getAttribute('data-id'));
-        entries = entries.filter(e => e.id !== id);
-        render();
-        saveLocal();
+      document.querySelectorAll('.del-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = Number(btn.getAttribute('data-id'));
+          entries = entries.filter(e => e.id !== id);
+          render();
+          saveLocal();
+        });
       });
-    });
+    }
+
+    const unsentCount = entries.filter(e => !e.sent).length;
+    sendAllBtn.disabled = unsentCount === 0;
+    sendAllBtn.textContent = unsentCount > 0 ? `Send All (${unsentCount})` : 'Send All';
+    unsentNoteEl.textContent = unsentCount === 0
+      ? (entries.length === 0 ? '' : 'Everything has been sent.')
+      : `${unsentCount} ${unsentCount === 1 ? 'tip' : 'tips'} not yet sent.`;
   }
 
-  // Pure mathematical Haversine calculation to check distances globally
+  // ---------- Airport lookup (unchanged) ----------
   function calculateDistance(lat1, lon1, lat2, lon2) {
-    const R = 3958.8; // Earth radius in miles
+    const R = 3958.8;
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
     const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
@@ -380,7 +418,6 @@
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
 
-  // Backup fallback system using reverse geocoding if the massive lookup fails
   function runFallbackCityLookup(lat, lon) {
     fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`)
       .then(r => r.json())
@@ -397,7 +434,6 @@
       });
   }
 
-  // Geolocation trigger mapped to the 28,000 global airport database
   gpsBtn.addEventListener('click', () => {
     errorEl.style.display = 'none';
     if (!navigator.geolocation) {
@@ -405,57 +441,40 @@
       errorEl.style.display = 'block';
       return;
     }
-
     gpsBtn.textContent = '⏳';
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const userLat = position.coords.latitude;
         const userLon = position.coords.longitude;
-
-        // Streams the open-source global database directly into the browser session
         fetch('https://raw.githubusercontent.com/mwgg/Airports/master/airports.json')
           .then(res => res.json())
           .then(airports => {
             let closestCode = null;
             let shortestDistance = Infinity;
-
-            // Iterates instantly over every airport to locate the absolute closest match
             for (const key in airports) {
               const ap = airports[key];
               if (!ap.lat || !ap.lon) continue;
-
               const distance = calculateDistance(userLat, userLon, ap.lat, ap.lon);
               if (distance < shortestDistance) {
                 shortestDistance = distance;
-                // Favor the standard identifier code (ICAO or IATA)
                 closestCode = ap.icao || ap.iata || key;
               }
             }
-
-            // Cap the lock to a realistic 25-mile operational limit 
             if (closestCode && shortestDistance <= 25) {
               locationEl.value = closestCode.trim().toUpperCase();
               reasonEl.focus();
               gpsBtn.textContent = '🧭';
             } else {
-              // Fallback to municipal city data if you are deep in the woods or completely off grid
               runFallbackCityLookup(userLat, userLon);
             }
           })
-          .catch(() => {
-            // Safe fallback if the GitHub file raw text encounters a network glitch
-            runFallbackCityLookup(userLat, userLon);
-          });
+          .catch(() => { runFallbackCityLookup(userLat, userLon); });
       },
-      // Privacy Error Callback (Handles denied access or disabled device toggles cleanly!)
       (error) => {
         gpsBtn.textContent = '🧭';
         switch (error.code) {
           case error.PERMISSION_DENIED:
-            alert(
-              "Location access denied.\n\n" +
-              "To auto-fill your closest airport, please enable Location Services for Safari/Chrome in your iPhone Settings, or type the code manually."
-            );
+            alert("Location access denied.\n\nTo auto-fill your closest airport, please enable Location Services for Safari/Chrome in your iPhone Settings, or type the code manually.");
             break;
           case error.POSITION_UNAVAILABLE:
             errorEl.textContent = 'Location information is unavailable.';
@@ -488,7 +507,7 @@
       return;
     }
 
-    entries.push({ id: Date.now(), date, location, reason, amount: amount ? Number(amount) : null });
+    entries.push({ id: Date.now(), date, location, reason, amount: amount ? Number(amount) : null, sent: false });
 
     locationEl.value = '';
     reasonEl.value = '';
@@ -500,9 +519,9 @@
 
   exportBtn.addEventListener('click', () => {
     if (entries.length === 0) return;
-    const rows = [['Date','Location','Reason','Amount']];
+    const rows = [['Date','Location','Reason','Amount','Sent']];
     entries.slice().sort((a,b) => a.date.localeCompare(b.date)).forEach(e => {
-      rows.push([e.date, e.location, e.reason, e.amount != null ? e.amount : '']);
+      rows.push([e.date, e.location, e.reason, e.amount != null ? e.amount : '', e.sent ? 'Yes' : 'No']);
     });
     const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
@@ -514,16 +533,152 @@
     URL.revokeObjectURL(url);
   });
 
-  // Global window function invoked when tapping the adjacent [X] box
   window.confirmClear = function() {
     let warning = confirm("Are you sure you want to clear all data? This cannot be undone.");
-    
     if (warning) {
       localStorage.removeItem(STORAGE_KEY);
       entries = [];
       render();
     }
   };
+
+  copyEmailBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(EXPENSEIT_EMAIL).then(() => {
+      copyEmailBtn.textContent = 'Copied';
+      setTimeout(() => { copyEmailBtn.textContent = 'Copy'; }, 1500);
+    }).catch(() => {});
+  });
+
+  // ---------- Receipt image generation ----------
+  function generateReceiptImage(entry) {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      const w = 640, h = 760;
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, w, h);
+      ctx.strokeStyle = '#dddddd';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(20, 20, w - 40, h - 40);
+
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#111111';
+      ctx.font = '700 30px -apple-system, Helvetica, Arial, sans-serif';
+      ctx.fillText('TIP RECEIPT', w / 2, 90);
+
+      ctx.strokeStyle = '#cccccc';
+      ctx.beginPath();
+      ctx.moveTo(60, 120);
+      ctx.lineTo(w - 60, 120);
+      ctx.stroke();
+
+      ctx.textAlign = 'left';
+      const labelX = 60;
+      let y = 180;
+      const lineGap = 90;
+
+      function field(label, value) {
+        ctx.font = '600 15px -apple-system, Helvetica, Arial, sans-serif';
+        ctx.fillStyle = '#888888';
+        ctx.fillText(label.toUpperCase(), labelX, y);
+        ctx.font = '600 26px -apple-system, Helvetica, Arial, sans-serif';
+        ctx.fillStyle = '#111111';
+        ctx.fillText(value, labelX, y + 32);
+        y += lineGap;
+      }
+
+      field('Date', fmtDateLong(entry.date));
+      field('Location', entry.location);
+      field('For', entry.reason);
+      field('Amount', entry.amount != null ? fmtMoney(entry.amount) : 'N/A');
+
+      ctx.strokeStyle = '#cccccc';
+      ctx.beginPath();
+      ctx.moveTo(60, y + 10);
+      ctx.lineTo(w - 60, y + 10);
+      ctx.stroke();
+
+      ctx.textAlign = 'center';
+      ctx.font = '400 13px -apple-system, Helvetica, Arial, sans-serif';
+      ctx.fillStyle = '#999999';
+      ctx.fillText('Generated from Tip Tracker', w / 2, h - 50);
+
+      canvas.toBlob((blob) => resolve(blob), 'image/png');
+    });
+  }
+
+  // ---------- Send flow ----------
+  function openOverlay() { overlayEl.classList.add('open'); }
+  function closeOverlay() { overlayEl.classList.remove('open'); }
+
+  async function showQueueEntry() {
+    if (sendIndex >= sendQueue.length) {
+      closeOverlay();
+      render();
+      saveLocal();
+      return;
+    }
+    const entry = sendQueue[sendIndex];
+    sheetProgressEl.textContent = `Sending ${sendIndex + 1} of ${sendQueue.length}`;
+    currentBlob = await generateReceiptImage(entry);
+    receiptPreviewEl.src = URL.createObjectURL(currentBlob);
+  }
+
+  sendAllBtn.addEventListener('click', () => {
+    sendQueue = entries.filter(e => !e.sent).sort((a,b) => a.date.localeCompare(b.date));
+    if (sendQueue.length === 0) return;
+    sendIndex = 0;
+    openOverlay();
+    showQueueEntry();
+  });
+
+  closeSheetBtn.addEventListener('click', () => {
+    closeOverlay();
+    render();
+    saveLocal();
+  });
+
+  shareBtn.addEventListener('click', async () => {
+    if (!currentBlob) return;
+    const entry = sendQueue[sendIndex];
+    const fileName = `tip-receipt-${entry.date}-${entry.location}.png`.replace(/\s+/g, '-');
+    const file = new File([currentBlob], fileName, { type: 'image/png' });
+
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({
+          files: [file],
+          text: `Tip receipt — ${fmtDateLong(entry.date)}, ${entry.location}. Send to ${EXPENSEIT_EMAIL} from your verified Concur email, subject left blank.`
+        });
+      } catch (e) {
+        // user cancelled share sheet — do nothing, they can retry or skip
+      }
+    } else {
+      // Fallback: download the image so it can be attached manually
+      const url = URL.createObjectURL(currentBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      a.click();
+      URL.revokeObjectURL(url);
+      alert(`Your browser can't open the share sheet directly. The receipt image downloaded — attach it manually in an email to ${EXPENSEIT_EMAIL} with the subject left blank.`);
+    }
+  });
+
+  markSentBtn.addEventListener('click', () => {
+    const entry = sendQueue[sendIndex];
+    const target = entries.find(e => e.id === entry.id);
+    if (target) target.sent = true;
+    sendIndex += 1;
+    showQueueEntry();
+  });
+
+  skipBtn.addEventListener('click', () => {
+    sendIndex += 1;
+    showQueueEntry();
+  });
 
   loadLocal();
 })();
