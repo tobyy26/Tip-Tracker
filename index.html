@@ -648,10 +648,9 @@
 
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       try {
-        await navigator.share({
-          files: [file],
-          text: `Tip receipt — ${fmtDateLong(entry.date)}, ${entry.location}. Send to ${EXPENSEIT_EMAIL} from your verified Concur email, subject left blank.`
-        });
+        // No text/title here on purpose — ExpenseIt requires a blank subject line,
+        // and Mail's share target uses this field as the subject.
+        await navigator.share({ files: [file] });
       } catch (e) {
         // user cancelled share sheet — do nothing, they can retry or skip
       }
