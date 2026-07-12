@@ -135,39 +135,39 @@
   }
   #clear-btn:active { background-color: var(--danger); color: white; border-color: var(--danger); transform: scale(0.95); }
   .entry {
-    display: flex; align-items: center; gap: 10px;
+    display: flex; align-items: center; gap: 8px;
     padding: 12px 0; border-bottom: 1px solid var(--border);
   }
   .entry-main { flex: 1; min-width: 0; }
   .entry-top { display: flex; align-items: baseline; gap: 8px; }
   .entry-date { font-size: 13px; color: var(--text-secondary); min-width: 44px; }
   .entry-reason { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .entry-loc { font-size: 12px; color: var(--text-muted); margin-top: 2px; display: flex; align-items: center; gap: 6px; }
-  .sent-badge {
-    font-size: 10px; font-weight: 700; letter-spacing: 0.02em;
-    color: var(--accent); background: var(--accent-bg);
-    border-radius: 4px; padding: 1px 6px;
-  }
+  .entry-loc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
   .entry-amount { font-size: 14px; font-weight: 600; white-space: nowrap; }
-  .del-btn {
+  .icon-btn {
     border: none; background: transparent; padding: 4px;
-    width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
-    color: var(--text-muted); font-size: 18px;
+    width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted); font-size: 15px; flex-shrink: 0;
   }
+  .icon-btn.copied { color: var(--accent); }
   .empty { text-align: center; padding: 2rem 1rem; color: var(--text-muted); font-size: 13px; display: none; }
 
-  .email-row {
-    display: flex; align-items: center; justify-content: space-between;
-    background: var(--surface-1); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 8px 10px; margin-bottom: 12px;
+  .summary-box {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    font-family: ui-monospace, "SF Mono", monospace;
+    font-size: 12.5px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: var(--text-primary);
+    max-height: 220px;
+    overflow-y: auto;
+    margin-bottom: 12px;
   }
-  .email-row span { font-size: 13px; font-family: ui-monospace, monospace; }
-  .copy-btn {
-    border: 1px solid var(--border-strong); background: var(--surface-2);
-    color: var(--text-primary); border-radius: 6px; font-size: 11px;
-    font-weight: 600; padding: 5px 9px; flex-shrink: 0; margin-left: 8px;
-  }
-  .unsent-note { font-size: 12px; color: var(--text-secondary); margin-top: 10px; text-align: center; }
+  .summary-empty { color: var(--text-muted); font-family: inherit; font-size: 13px; }
 
   .overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,0.5);
@@ -179,17 +179,33 @@
     width: 100%; max-width: 480px;
     border-radius: 16px 16px 0 0;
     padding: 1.1rem 1.1rem calc(1.5rem + env(safe-area-inset-bottom));
-    max-height: 88vh; overflow-y: auto;
+    max-height: 90vh; overflow-y: auto;
   }
-  .sheet-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .sheet-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
   .sheet-header p { font-weight: 600; font-size: 15px; margin: 0; }
   .sheet-close { border: none; background: transparent; font-size: 20px; color: var(--text-muted); padding: 4px; }
-  .receipt-preview {
-    width: 100%; border-radius: 10px; border: 1px solid var(--border);
-    display: block; margin-bottom: 14px; background: white;
+  .sheet-progress { font-size: 12px; color: var(--text-secondary); text-align: center; margin-bottom: 14px; }
+
+  .review-field {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
   }
-  .sheet-actions { display: flex; flex-direction: column; gap: 8px; }
-  .sheet-progress { font-size: 12px; color: var(--text-secondary); text-align: center; margin-bottom: 10px; }
+  .review-field-text { min-width: 0; }
+  .review-field-label { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 2px; }
+  .review-field-value { font-size: 20px; font-weight: 600; overflow-wrap: break-word; }
+  .review-copy-btn {
+    border: 1px solid var(--border-strong); background: var(--surface-1);
+    color: var(--text-primary); border-radius: 6px; font-size: 12px;
+    font-weight: 600; padding: 8px 12px; flex-shrink: 0;
+  }
+  .review-copy-btn.copied { background: var(--accent); color: white; border-color: var(--accent); }
+
+  .review-nav { display: flex; gap: 8px; margin-top: 4px; }
+  .review-nav button { flex: 1; }
 </style>
 </head>
 <body>
@@ -235,30 +251,55 @@
   <div class="empty" id="empty-state">No tips logged yet. Add your first one above.</div>
 
   <div class="card" id="submit-card">
-    <p class="card-title">Submit to Concur</p>
-    <p class="card-subtitle">Sends each tip as its own receipt image to ExpenseIt, so it lands as an individual expense.</p>
-    <div class="email-row">
-      <span>receipts@expenseit.com</span>
-      <button class="copy-btn" id="copy-email-btn">Copy</button>
-    </div>
-    <button class="btn-primary" id="send-all-btn" disabled>Send All</button>
-    <p class="unsent-note" id="unsent-note"></p>
+    <p class="card-title">Copy for Concur</p>
+    <p class="card-subtitle">One line per tip — date, location, reason, amount. Tap Copy All, then paste into notes or as you fill out each Concur expense.</p>
+    <div class="summary-box" id="summary-box"></div>
+    <button class="btn-primary" id="review-btn" disabled>Review &amp; Copy Fields</button>
+    <button class="btn-secondary" id="copy-all-btn" disabled style="margin-top: 8px;">Copy All as Text</button>
   </div>
 
   <button id="export-btn" class="btn-secondary">Export as CSV</button>
 
-  <div class="overlay" id="send-overlay">
+  <div class="overlay" id="review-overlay">
     <div class="sheet">
       <div class="sheet-header">
-        <p>Send to Concur</p>
-        <button class="sheet-close" id="close-sheet-btn" aria-label="Close">&#10005;</button>
+        <p>Review Tips</p>
+        <button class="sheet-close" id="review-close-btn" aria-label="Close">&#10005;</button>
       </div>
-      <p class="sheet-progress" id="sheet-progress"></p>
-      <img class="receipt-preview" id="receipt-preview" alt="Receipt preview" />
-      <div class="sheet-actions">
-        <button class="btn-primary" id="share-btn">Share Receipt</button>
-        <button class="btn-secondary" id="mark-sent-btn">Mark Sent &amp; Next</button>
-        <button class="btn-secondary" id="skip-btn">Skip</button>
+      <p class="sheet-progress" id="review-progress"></p>
+
+      <div class="review-field">
+        <div class="review-field-text">
+          <div class="review-field-label">Date</div>
+          <div class="review-field-value" id="review-date"></div>
+        </div>
+        <button class="review-copy-btn" data-field="date">Copy</button>
+      </div>
+      <div class="review-field">
+        <div class="review-field-text">
+          <div class="review-field-label">Location</div>
+          <div class="review-field-value" id="review-location"></div>
+        </div>
+        <button class="review-copy-btn" data-field="location">Copy</button>
+      </div>
+      <div class="review-field">
+        <div class="review-field-text">
+          <div class="review-field-label">What it was for</div>
+          <div class="review-field-value" id="review-reason"></div>
+        </div>
+        <button class="review-copy-btn" data-field="reason">Copy</button>
+      </div>
+      <div class="review-field">
+        <div class="review-field-text">
+          <div class="review-field-label">Amount</div>
+          <div class="review-field-value" id="review-amount"></div>
+        </div>
+        <button class="review-copy-btn" data-field="amount">Copy</button>
+      </div>
+
+      <div class="review-nav">
+        <button class="btn-secondary" id="review-prev-btn">&larr; Prev</button>
+        <button class="btn-secondary" id="review-next-btn">Next &rarr;</button>
       </div>
     </div>
   </div>
@@ -266,11 +307,7 @@
 <script>
 (function() {
   const STORAGE_KEY = 'tip-entries-local';
-  const EXPENSEIT_EMAIL = 'receipts@expenseit.com';
   let entries = [];
-  let sendQueue = [];
-  let sendIndex = 0;
-  let currentBlob = null;
 
   const dateEl = document.getElementById('tip-date');
   const amountEl = document.getElementById('tip-amount');
@@ -284,16 +321,20 @@
   const totalEl = document.getElementById('total');
   const exportBtn = document.getElementById('export-btn');
   const chipsEl = document.getElementById('loc-chips');
-  const sendAllBtn = document.getElementById('send-all-btn');
-  const unsentNoteEl = document.getElementById('unsent-note');
-  const copyEmailBtn = document.getElementById('copy-email-btn');
-  const overlayEl = document.getElementById('send-overlay');
-  const sheetProgressEl = document.getElementById('sheet-progress');
-  const receiptPreviewEl = document.getElementById('receipt-preview');
-  const shareBtn = document.getElementById('share-btn');
-  const markSentBtn = document.getElementById('mark-sent-btn');
-  const skipBtn = document.getElementById('skip-btn');
-  const closeSheetBtn = document.getElementById('close-sheet-btn');
+  const summaryBoxEl = document.getElementById('summary-box');
+  const copyAllBtn = document.getElementById('copy-all-btn');
+  const reviewBtn = document.getElementById('review-btn');
+  const reviewOverlayEl = document.getElementById('review-overlay');
+  const reviewCloseBtn = document.getElementById('review-close-btn');
+  const reviewProgressEl = document.getElementById('review-progress');
+  const reviewPrevBtn = document.getElementById('review-prev-btn');
+  const reviewNextBtn = document.getElementById('review-next-btn');
+  const reviewDateEl = document.getElementById('review-date');
+  const reviewLocationEl = document.getElementById('review-location');
+  const reviewReasonEl = document.getElementById('review-reason');
+  const reviewAmountEl = document.getElementById('review-amount');
+  let reviewQueue = [];
+  let reviewIndex = 0;
 
   function todayStr() {
     const d = new Date();
@@ -313,11 +354,10 @@
     }
     return iso;
   }
-  function fmtDateLong(iso) {
+  function fmtDateShortNumeric(iso) {
     const parts = iso.split('-');
     if (parts.length === 3) {
-      const d = new Date(parts[0], parts[1] - 1, parts[2]);
-      return d.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
+      return `${Number(parts[1])}/${Number(parts[2])}/${parts[0]}`;
     }
     return iso;
   }
@@ -359,9 +399,31 @@
     });
   }
 
+  function entryLine(e) {
+    return `${fmtDateShortNumeric(e.date)}  —  ${e.location}  —  ${e.reason}  —  ${e.amount != null ? fmtMoney(e.amount) : 'N/A'}`;
+  }
+
+  function renderSummary() {
+    if (entries.length === 0) {
+      summaryBoxEl.innerHTML = '<span class="summary-empty">Nothing logged yet.</span>';
+      copyAllBtn.disabled = true;
+      reviewBtn.disabled = true;
+      return;
+    }
+    const sorted = entries.slice().sort((a,b) => a.date.localeCompare(b.date));
+    summaryBoxEl.textContent = sorted.map(entryLine).join('\n');
+    copyAllBtn.disabled = false;
+    reviewBtn.disabled = false;
+  }
+
+  function copyText(text, onDone) {
+    navigator.clipboard.writeText(text).then(onDone).catch(() => {});
+  }
+
   function render() {
     entries.sort((a,b) => b.date.localeCompare(a.date) || b.id - a.id);
     renderChips();
+    renderSummary();
 
     if (entries.length === 0) {
       listEl.innerHTML = '';
@@ -379,13 +441,11 @@
               <span class="entry-date">${fmtDate(e.date)}</span>
               <span class="entry-reason">${escapeHtml(e.reason || 'Tip')}</span>
             </div>
-            <div class="entry-loc">
-              ${escapeHtml(e.location || 'No location')}
-              ${e.sent ? '<span class="sent-badge">SENT</span>' : ''}
-            </div>
+            <div class="entry-loc">${escapeHtml(e.location || 'No location')}</div>
           </div>
           <span class="entry-amount">${e.amount ? fmtMoney(e.amount) : ''}</span>
-          <button data-id="${e.id}" class="del-btn" aria-label="Delete entry">&#10005;</button>
+          <button data-id="${e.id}" class="icon-btn copy-entry-btn" aria-label="Copy this entry">&#128203;</button>
+          <button data-id="${e.id}" class="icon-btn del-btn" aria-label="Delete entry">&#10005;</button>
         </div>
       `).join('');
 
@@ -397,14 +457,23 @@
           saveLocal();
         });
       });
-    }
 
-    const unsentCount = entries.filter(e => !e.sent).length;
-    sendAllBtn.disabled = unsentCount === 0;
-    sendAllBtn.textContent = unsentCount > 0 ? `Send All (${unsentCount})` : 'Send All';
-    unsentNoteEl.textContent = unsentCount === 0
-      ? (entries.length === 0 ? '' : 'Everything has been sent.')
-      : `${unsentCount} ${unsentCount === 1 ? 'tip' : 'tips'} not yet sent.`;
+      document.querySelectorAll('.copy-entry-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = Number(btn.getAttribute('data-id'));
+          const e = entries.find(x => x.id === id);
+          if (!e) return;
+          copyText(entryLine(e), () => {
+            btn.innerHTML = '&#10003;';
+            btn.classList.add('copied');
+            setTimeout(() => {
+              btn.innerHTML = '&#128203;';
+              btn.classList.remove('copied');
+            }, 1200);
+          });
+        });
+      });
+    }
   }
 
   // ---------- Airport lookup (unchanged) ----------
@@ -507,7 +576,7 @@
       return;
     }
 
-    entries.push({ id: Date.now(), date, location, reason, amount: amount ? Number(amount) : null, sent: false });
+    entries.push({ id: Date.now(), date, location, reason, amount: amount ? Number(amount) : null });
 
     locationEl.value = '';
     reasonEl.value = '';
@@ -517,11 +586,21 @@
     saveLocal();
   });
 
+  copyAllBtn.addEventListener('click', () => {
+    if (entries.length === 0) return;
+    const sorted = entries.slice().sort((a,b) => a.date.localeCompare(b.date));
+    const text = sorted.map(entryLine).join('\n');
+    copyText(text, () => {
+      copyAllBtn.textContent = 'Copied!';
+      setTimeout(() => { copyAllBtn.textContent = 'Copy All'; }, 1500);
+    });
+  });
+
   exportBtn.addEventListener('click', () => {
     if (entries.length === 0) return;
-    const rows = [['Date','Location','Reason','Amount','Sent']];
+    const rows = [['Date','Location','Reason','Amount']];
     entries.slice().sort((a,b) => a.date.localeCompare(b.date)).forEach(e => {
-      rows.push([e.date, e.location, e.reason, e.amount != null ? e.amount : '', e.sent ? 'Yes' : 'No']);
+      rows.push([e.date, e.location, e.reason, e.amount != null ? e.amount : '']);
     });
     const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
@@ -533,6 +612,74 @@
     URL.revokeObjectURL(url);
   });
 
+  // ---------- Review mode ----------
+  function openReviewOverlay() { reviewOverlayEl.classList.add('open'); }
+  function closeReviewOverlay() { reviewOverlayEl.classList.remove('open'); }
+
+  function showReviewEntry() {
+    const e = reviewQueue[reviewIndex];
+    reviewProgressEl.textContent = `Tip ${reviewIndex + 1} of ${reviewQueue.length}`;
+    reviewDateEl.textContent = fmtDateShortNumeric(e.date);
+    reviewLocationEl.textContent = e.location;
+    reviewReasonEl.textContent = e.reason;
+    reviewAmountEl.textContent = e.amount != null ? fmtMoney(e.amount) : 'N/A';
+
+    reviewPrevBtn.disabled = reviewIndex === 0;
+    reviewNextBtn.textContent = reviewIndex === reviewQueue.length - 1 ? 'Done' : 'Next →';
+
+    document.querySelectorAll('.review-copy-btn').forEach(btn => {
+      btn.textContent = 'Copy';
+      btn.classList.remove('copied');
+    });
+  }
+
+  reviewBtn.addEventListener('click', () => {
+    if (entries.length === 0) return;
+    reviewQueue = entries.slice().sort((a,b) => a.date.localeCompare(b.date));
+    reviewIndex = 0;
+    openReviewOverlay();
+    showReviewEntry();
+  });
+
+  reviewCloseBtn.addEventListener('click', closeReviewOverlay);
+
+  reviewPrevBtn.addEventListener('click', () => {
+    if (reviewIndex > 0) {
+      reviewIndex -= 1;
+      showReviewEntry();
+    }
+  });
+
+  reviewNextBtn.addEventListener('click', () => {
+    if (reviewIndex < reviewQueue.length - 1) {
+      reviewIndex += 1;
+      showReviewEntry();
+    } else {
+      closeReviewOverlay();
+    }
+  });
+
+  document.querySelectorAll('.review-copy-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const field = btn.getAttribute('data-field');
+      const e = reviewQueue[reviewIndex];
+      let value = '';
+      if (field === 'date') value = fmtDateShortNumeric(e.date);
+      else if (field === 'location') value = e.location;
+      else if (field === 'reason') value = e.reason;
+      else if (field === 'amount') value = e.amount != null ? fmtMoney(e.amount) : '';
+
+      copyText(value, () => {
+        btn.textContent = 'Copied';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = 'Copy';
+          btn.classList.remove('copied');
+        }, 1200);
+      });
+    });
+  });
+
   window.confirmClear = function() {
     let warning = confirm("Are you sure you want to clear all data? This cannot be undone.");
     if (warning) {
@@ -541,143 +688,6 @@
       render();
     }
   };
-
-  copyEmailBtn.addEventListener('click', () => {
-    navigator.clipboard.writeText(EXPENSEIT_EMAIL).then(() => {
-      copyEmailBtn.textContent = 'Copied';
-      setTimeout(() => { copyEmailBtn.textContent = 'Copy'; }, 1500);
-    }).catch(() => {});
-  });
-
-  // ---------- Receipt image generation ----------
-  function generateReceiptImage(entry) {
-    return new Promise((resolve) => {
-      const canvas = document.createElement('canvas');
-      const w = 640, h = 760;
-      canvas.width = w; canvas.height = h;
-      const ctx = canvas.getContext('2d');
-
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, w, h);
-      ctx.strokeStyle = '#dddddd';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(20, 20, w - 40, h - 40);
-
-      ctx.textAlign = 'center';
-      ctx.fillStyle = '#111111';
-      ctx.font = '700 30px -apple-system, Helvetica, Arial, sans-serif';
-      ctx.fillText('TIP RECEIPT', w / 2, 90);
-
-      ctx.strokeStyle = '#cccccc';
-      ctx.beginPath();
-      ctx.moveTo(60, 120);
-      ctx.lineTo(w - 60, 120);
-      ctx.stroke();
-
-      ctx.textAlign = 'left';
-      const labelX = 60;
-      let y = 180;
-      const lineGap = 90;
-
-      function field(label, value) {
-        ctx.font = '600 15px -apple-system, Helvetica, Arial, sans-serif';
-        ctx.fillStyle = '#888888';
-        ctx.fillText(label.toUpperCase(), labelX, y);
-        ctx.font = '600 26px -apple-system, Helvetica, Arial, sans-serif';
-        ctx.fillStyle = '#111111';
-        ctx.fillText(value, labelX, y + 32);
-        y += lineGap;
-      }
-
-      field('Date', fmtDateLong(entry.date));
-      field('Location', entry.location);
-      field('For', entry.reason);
-      field('Amount', entry.amount != null ? fmtMoney(entry.amount) : 'N/A');
-
-      ctx.strokeStyle = '#cccccc';
-      ctx.beginPath();
-      ctx.moveTo(60, y + 10);
-      ctx.lineTo(w - 60, y + 10);
-      ctx.stroke();
-
-      ctx.textAlign = 'center';
-      ctx.font = '400 13px -apple-system, Helvetica, Arial, sans-serif';
-      ctx.fillStyle = '#999999';
-      ctx.fillText('Generated from Tip Tracker', w / 2, h - 50);
-
-      canvas.toBlob((blob) => resolve(blob), 'image/png');
-    });
-  }
-
-  // ---------- Send flow ----------
-  function openOverlay() { overlayEl.classList.add('open'); }
-  function closeOverlay() { overlayEl.classList.remove('open'); }
-
-  async function showQueueEntry() {
-    if (sendIndex >= sendQueue.length) {
-      closeOverlay();
-      render();
-      saveLocal();
-      return;
-    }
-    const entry = sendQueue[sendIndex];
-    sheetProgressEl.textContent = `Sending ${sendIndex + 1} of ${sendQueue.length}`;
-    currentBlob = await generateReceiptImage(entry);
-    receiptPreviewEl.src = URL.createObjectURL(currentBlob);
-  }
-
-  sendAllBtn.addEventListener('click', () => {
-    sendQueue = entries.filter(e => !e.sent).sort((a,b) => a.date.localeCompare(b.date));
-    if (sendQueue.length === 0) return;
-    sendIndex = 0;
-    openOverlay();
-    showQueueEntry();
-  });
-
-  closeSheetBtn.addEventListener('click', () => {
-    closeOverlay();
-    render();
-    saveLocal();
-  });
-
-  shareBtn.addEventListener('click', async () => {
-    if (!currentBlob) return;
-    const entry = sendQueue[sendIndex];
-    const fileName = `tip-receipt-${entry.date}-${entry.location}.png`.replace(/\s+/g, '-');
-    const file = new File([currentBlob], fileName, { type: 'image/png' });
-
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      try {
-        // No text/title here on purpose — ExpenseIt requires a blank subject line,
-        // and Mail's share target uses this field as the subject.
-        await navigator.share({ files: [file] });
-      } catch (e) {
-        // user cancelled share sheet — do nothing, they can retry or skip
-      }
-    } else {
-      // Fallback: download the image so it can be attached manually
-      const url = URL.createObjectURL(currentBlob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = fileName;
-      a.click();
-      URL.revokeObjectURL(url);
-      alert(`Your browser can't open the share sheet directly. The receipt image downloaded — attach it manually in an email to ${EXPENSEIT_EMAIL} with the subject left blank.`);
-    }
-  });
-
-  markSentBtn.addEventListener('click', () => {
-    const entry = sendQueue[sendIndex];
-    const target = entries.find(e => e.id === entry.id);
-    if (target) target.sent = true;
-    sendIndex += 1;
-    showQueueEntry();
-  });
-
-  skipBtn.addEventListener('click', () => {
-    sendIndex += 1;
-    showQueueEntry();
-  });
 
   loadLocal();
 })();
